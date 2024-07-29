@@ -7,7 +7,7 @@ const conn = mysql.createConnection({  // mysql 접속 설정
     user: 'root',
     password: 'kky240101!',
     database: 'kkokiyodb'
-});
+});  
 
 // 데이터베이스 연결
 connection.connect(err => {
