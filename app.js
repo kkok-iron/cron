@@ -50,7 +50,7 @@ connection.connect(err => {
     timezone: "Asia/Seoul" // 원하는 시간대로 설정하세요
   });
   
-  // 회원 동기화 작업 : 매일 자정 실행
+  // 회원 동기화 작업 : 매일 4시 실행
   cron.schedule('0 4 * * *', () => {
     
    //activity_num 업데이트 쿼리
@@ -76,6 +76,13 @@ connection.connect(err => {
       }
       console.log('Update query executed successfully', results);
     });
+  }, {
+    scheduled: true,
+    timezone: "Asia/Seoul" // 원하는 시간대로 설정하세요
+  });
+
+  // following_num 작업 : 매일 자정 실행
+  cron.schedule('15 4 * * *', () => {
 
   //following_num 업데이트 쿼리
   const updateQuery2 = `
@@ -97,6 +104,14 @@ connection.connect(err => {
     }
     console.log('Update query executed successfully', results);
     });
+  }, {
+    scheduled: true,
+    timezone: "Asia/Seoul" // 원하는 시간대로 설정하세요
+  });
+
+
+  // follower_num :  실행
+  cron.schedule('30 4 * * *', () => {
 
   //follower_num 업데이트 쿼리
   const updateQuery3 = `
@@ -118,7 +133,6 @@ connection.connect(err => {
     }
     console.log('Update query executed successfully', results);
     });
-  
   }, {
     scheduled: true,
     timezone: "Asia/Seoul" // 원하는 시간대로 설정하세요
