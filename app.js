@@ -17,6 +17,26 @@ connection.connect(err => {
     }
     console.log('Connected to the database');
   });
+
+  // push_fatigue : 0시 truncate 실행
+  cron.schedule('0 0 * * *', () => {
+
+    //follower_num 업데이트 쿼리
+    const updateQuery4 = `
+        truncate table push_fatigue;
+      `;
+  
+      connection.query(updateQuery4, (err, results) => {
+      if (err) {
+        console.error('Error executing the update query:', err);
+        return;
+      }
+      console.log('query executed successfully', results);
+      });
+    }, {
+      scheduled: true,
+      timezone: "Asia/Seoul" // 원하는 시간대로 설정하세요
+    });
   
   // 연속 일수 작업 : 매일 자정 실행
   cron.schedule('0 0 * * *', () => {
