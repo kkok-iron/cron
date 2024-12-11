@@ -23,7 +23,7 @@ connection.connect(err => {
 
     //follower_num 업데이트 쿼리
     const updateQuery4 = `
-        truncate table push_fatigue;
+        truncate push_fatigue;
       `;
   
       connection.query(updateQuery4, (err, results) => {
