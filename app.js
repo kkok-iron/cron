@@ -283,11 +283,9 @@ async function updateActivityLikeNum() {
                 FROM activity a 
                 LEFT JOIN activity_like b
                 ON a.id = b.activity_id AND a.del_yn = 'N' AND b.del_yn = 'N'
-                where a.uid = 'yW3SmNMgnNZnk48RsKjeCcxkpnY2'
                 GROUP BY a.id          
             ) like_counts ON a.id = like_counts.id
             SET a.like_cnt = COALESCE(like_counts.like_count, 0)
-            where a.uid = 'yW3SmNMgnNZnk48RsKjeCcxkpnY2';
         `;
         await executeQuery(connection, query, [], 'Activity Like numbers updated successfully.');
     } catch (error) {
@@ -319,11 +317,9 @@ async function updateActivityReplyNum() {
                 FROM activity a 
                 LEFT JOIN reply b
                 ON a.id = b.activity_id AND a.del_yn = 'N' AND b.del_yn = 'N'
-                where a.uid = 'yW3SmNMgnNZnk48RsKjeCcxkpnY2'
                 GROUP BY a.id          
             ) reply_counts ON a.id = reply_counts.id
             SET a.reply_cnt = COALESCE(reply_counts.reply_count, 0)
-            where a.uid = 'yW3SmNMgnNZnk48RsKjeCcxkpnY2';
         `;
         await executeQuery(connection, query, [], 'Activity reply numbers updated successfully.');
     } catch (error) {
@@ -370,15 +366,80 @@ async function updateContentLikeNum() {
     }
 }
 
+// 9. 상품 삭제 작업
+async function updateGoods() {
+    const connection = createConnection();
+    connection.connect(err => {
+        if (err) {
+            console.error('Error connecting to the database:', err);
+            return;
+        }
+        console.log('Connected to the database');
+    });
+
+    try {
+        const query = `
+            UPDATE goods_giftshow_2 a
+            INNER JOIN (
+                SELECT a.goods_code
+                FROM goods_giftshow_2 a
+                where a.goods_code not in (select goodsCode from giftshow_products gp)
+            ) AS t ON a.goods_code = t.goods_code
+            SET a.sale_yn = 'N';
+        `;
+        await executeQuery(connection, query, [], 'Goods updated successfully.');
+    } catch (error) {
+        console.error('Error updating Goods:', error.message);
+    } finally {
+        connection.end(err => {
+            if (err) console.error('Error disconnecting from the database:', err);
+            else console.log('Disconnected from the database');
+        });
+    }
+}
+
+// 10. 신규 상품 Insert
+async function insertGoods() {
+    const connection = createConnection();
+    connection.connect(err => {
+        if (err) {
+            console.error('Error connecting to the database:', err);
+            return;
+        }
+        console.log('Connected to the database');
+    });
+
+    try {
+        const query = `
+            INSERT INTO kkokiyodb.goods_giftshow_2
+            (goods_name, goods_code, goods_img_s, goods_img_b, limit_day, sale_price, discount_price, content, brand_name, brand_icon_img, discount_rate, sale_yn, del_yn, reg_dt, mod_dt, del_dt, buy_cnt, order_num, category_id)
+            select goodsName, goodsCode, goodsImgS, goodsImgB, limitDay, salePrice, discountPrice, content, brandName, brandIconImg, discountRate, 'N', 'N', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 0, 0, 0
+            from giftshow_products
+            where goodsCode not in ( select goods_code from goods_giftshow_2 )        
+            ;
+        `;
+        await executeQuery(connection, query, [], 'Goods insert successfully.');
+    } catch (error) {
+        console.error('Error updating Goods:', error.message);
+    } finally {
+        connection.end(err => {
+            if (err) console.error('Error disconnecting from the database:', err);
+            else console.log('Disconnected from the database');
+        });
+    }
+}
+
 // 크론 작업 스케줄링 (각 작업이 실행될 때마다 개별 DB 연결 생성/종료)
 cron.schedule('0 0 * * *', truncatePushFatigue, { timezone: "Asia/Seoul" });
-cron.schedule('0 0 * * *', resetContinueNum, { timezone: "Asia/Seoul" });
+cron.schedule('5 0 * * *', resetContinueNum, { timezone: "Asia/Seoul" });
 cron.schedule('0 4 * * *', updateActivityNum, { timezone: "Asia/Seoul" });
 cron.schedule('15 4 * * *', updateFollowNumbers, { timezone: "Asia/Seoul" });
 cron.schedule('0 1 * * *', updateProductList, { timezone: "Asia/Seoul" });
-cron.schedule('47 22 * * *', updateActivityLikeNum, { timezone: "Asia/Seoul" });
-cron.schedule('47 22 * * *', updateActivityReplyNum, { timezone: "Asia/Seoul" });
-cron.schedule('15 3 * * *', updateContentLikeNum, { timezone: "Asia/Seoul" });
+cron.schedule('0 3 * * *', updateActivityLikeNum, { timezone: "Asia/Seoul" });
+cron.schedule('15 3 * * *', updateActivityReplyNum, { timezone: "Asia/Seoul" });
+cron.schedule('30 3 * * *', updateContentLikeNum, { timezone: "Asia/Seoul" });
+cron.schedule('0 2 * * *', updateGoods, { timezone: "Asia/Seoul" });
+cron.schedule('30 2 * * *', insertGoods, { timezone: "Asia/Seoul" });
 
 // 프로세스 종료 시 별도 처리 (각 작업 내에서 연결 종료하므로 별도 글로벌 연결 종료는 필요 없음)
 process.on('SIGINT', () => {
