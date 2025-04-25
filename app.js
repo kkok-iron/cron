@@ -411,7 +411,7 @@ async function insertGoods() {
 
     try {
         const query = `
-            INSERT INTO kkokiyodb.goods_giftshow_2
+            INSERT INTO goods_giftshow_2
             (goods_name, goods_code, goods_img_s, goods_img_b, limit_day, sale_price, discount_price, content, brand_name, brand_icon_img, discount_rate, sale_yn, del_yn, reg_dt, mod_dt, del_dt, buy_cnt, order_num, category_id)
             select goodsName, goodsCode, goodsImgS, goodsImgB, limitDay, salePrice, discountPrice, content, brandName, brandIconImg, discountRate, 'N', 'N', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 0, 0, 0
             from giftshow_products
