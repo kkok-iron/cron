@@ -432,14 +432,14 @@ async function insertGoods() {
 // 크론 작업 스케줄링 (각 작업이 실행될 때마다 개별 DB 연결 생성/종료)
 cron.schedule('0 0 * * *', truncatePushFatigue, { timezone: "Asia/Seoul" });
 cron.schedule('5 0 * * *', resetContinueNum, { timezone: "Asia/Seoul" });
-cron.schedule('0 4 * * *', updateActivityNum, { timezone: "Asia/Seoul" });
-cron.schedule('15 4 * * *', updateFollowNumbers, { timezone: "Asia/Seoul" });
 cron.schedule('0 1 * * *', updateProductList, { timezone: "Asia/Seoul" });
+cron.schedule('0 2 * * *', updateGoods, { timezone: "Asia/Seoul" });
+cron.schedule('30 2 * * *', insertGoods, { timezone: "Asia/Seoul" });
 cron.schedule('0 3 * * *', updateActivityLikeNum, { timezone: "Asia/Seoul" });
 cron.schedule('15 3 * * *', updateActivityReplyNum, { timezone: "Asia/Seoul" });
 cron.schedule('30 3 * * *', updateContentLikeNum, { timezone: "Asia/Seoul" });
-cron.schedule('0 2 * * *', updateGoods, { timezone: "Asia/Seoul" });
-cron.schedule('30 2 * * *', insertGoods, { timezone: "Asia/Seoul" });
+cron.schedule('0 4 * * *', updateActivityNum, { timezone: "Asia/Seoul" });
+cron.schedule('15 4 * * *', updateFollowNumbers, { timezone: "Asia/Seoul" });
 
 // 프로세스 종료 시 별도 처리 (각 작업 내에서 연결 종료하므로 별도 글로벌 연결 종료는 필요 없음)
 process.on('SIGINT', () => {
